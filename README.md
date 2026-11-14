@@ -10,7 +10,15 @@ Install these prerequisites:
 2. **Qt 6.5 or newer**, using a compatible **MSVC x64 shared-library kit** with Qt Widgets and Qt SQL / SQLite support. Existing kits may still be named `msvc2022_64` (for example Qt 6.8.3). That name identifies the compiler used to build Qt, not the Visual Studio version this app uses. Microsoft's binary-compatibility rules allow older MSVC libraries to be linked by newer MSVC tools. This is not a claim that every Qt release officially certifies VS 2026. Prefer a maintained Qt release; use a compatible kit or rebuild Qt with your selected compiler if you encounter compatibility issues. Do not select MinGW, ARM or WebAssembly kits.
 3. **CMake 4.2 or newer**, added to PATH. CMake 4.2 introduced the `Visual Studio 18 2026` generator. For later Visual Studio releases, install a CMake version that supports that release.
 
-Open PowerShell in this folder and run, replacing the Qt path with your installed kit:
+Open PowerShell in this folder and run:
+
+```powershell
+.\build.ps1 -Launch
+```
+
+Before configuring or compiling, the script automatically searches Qt environment hints (`QTDIR`, `QT_ROOT_DIR`, `Qt6_DIR`, `CMAKE_PREFIX_PATH`), `qmake.exe` locations on PATH, `Qt` folders on local fixed drives, Program Files and user folders, and Qt uninstall-registry installation locations. It checks each root and two directory levels below it rather than scanning entire drives.
+
+It selects the newest detected Qt 6.5+ MSVC x64 shared-library kit with the required CMake modules, DLLs, SQLite driver, Windows platform plugin and deployment tool. The selected version and path are printed. Incompatible or incomplete kits are skipped; if none qualify, the script stops with instructions. For a custom location or to choose a specific kit, supply an explicit path (an invalid explicit path stops the build instead of falling back):
 
 ```powershell
 .\build.ps1 -QtPath "C:\Qt\6.8.3\msvc2022_64" -Launch
@@ -19,12 +27,12 @@ Open PowerShell in this folder and run, replacing the Qt path with your installe
 If PowerShell blocks the local script, use a one-process policy override, only after reviewing the script:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -QtPath "C:\Qt\6.8.3\msvc2022_64" -Launch
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Launch
 ```
 
 The script detects the newest installed stable Visual Studio 2026-or-newer instance with C++ tools using Microsoft's `vswhere`, then selects its matching generator from CMake's available generators. It fails with upgrade instructions if CMake does not support that version; it never silently falls back to VS 2022. Builds are stored separately under `build\vs18-x64` (or the selected newer major version), leaving old build folders intact.
 
-The script builds Release and stages the application and Qt runtime in **`dist`**. Run **`dist\DigiPlanner.exe`**. The script does not install dependencies automatically or change your system policy.
+The script refreshes CMake's configuration cache so switching Qt kits does not reuse an old Qt path, builds Release and stages the application and Qt runtime in **`dist`**. Run **`dist\DigiPlanner.exe`**. The script does not install dependencies automatically or change your system policy.
 
 ### Manual equivalent
 
@@ -58,7 +66,7 @@ References: [CMake's VS 2026 generator](https://cmake.org/cmake/help/latest/gene
 
 The database is **`%LOCALAPPDATA%\DigiPlanner\DigiPlanner\planner.db`**.
 
-this Windows edition stores data in the Windows user's writable local application-data folder, **not** the executable's working directory. This avoids permission failures under Program Files and preserves assignments when the program is updated. Hover over “Saved automatically on this PC” to see the exact path.
+Unlike the original cross-platform description, the Windows edition stores data in the Windows user's writable local application-data folder, **not** the executable's working directory. This avoids permission failures under Program Files and preserves assignments when the program is updated. Hover over “Saved automatically on this PC” to see the exact path.
 
 Close Digi-Planner before copying `planner.db` for a backup. To restore, close the app, keep a copy of the current database, then replace it with your backup. TXT and PDF are reports, not importable backups.
 
@@ -73,6 +81,7 @@ This is an unsigned portable-folder application, not an installer. Windows Smart
 ```
 CMakeLists.txt           Windows-only build and Qt deployment
 build.ps1               Windows build and stage script
+Find-Qt.ps1              Bounded Qt discovery and kit validation
 src/main.cpp            Windows check, data path, single instance, theme
 src/Event.h             Event structure and status/priority colors
 src/Database.*          SQLite schema and transactional operations
