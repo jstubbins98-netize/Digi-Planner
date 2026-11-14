@@ -1,6 +1,7 @@
 param(
     [string]$QtPath,
-    [switch]$Launch
+    [switch]$Launch,
+    [switch]$DiagnoseQt
 )
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -13,6 +14,10 @@ if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or
 $qt = Find-PlannerQt -ExplicitPath $QtPath
 $QtPath = $qt.Path
 Write-Host "Using Qt $($qt.Version) at $QtPath"
+if ($DiagnoseQt) {
+    Write-Host "Qt detection succeeded. No configuration or compilation was performed."
+    return
+}
 if (!(Get-Command cmake -ErrorAction SilentlyContinue)) {
     throw "Install CMake 4.2+ and add it to PATH, then open a new PowerShell window."
 }
