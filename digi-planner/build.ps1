@@ -1,5 +1,4 @@
 param(
-    [Parameter(Mandatory = $true)]
     [string]$QtPath,
     [switch]$Launch
 )
@@ -10,10 +9,10 @@ if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or
     [Environment]::OSVersion.Version.Build -lt 22000) {
     throw "This script requires Windows 11."
 }
-$QtPath = (Resolve-Path $QtPath).Path
-if (!(Test-Path "$QtPath\lib\cmake\Qt6\Qt6Config.cmake")) {
-    throw "QtPath must point to a compatible Qt MSVC x64 kit containing lib\cmake\Qt6\Qt6Config.cmake."
-}
+. (Join-Path $PSScriptRoot "Find-Qt.ps1")
+$qt = Find-PlannerQt -ExplicitPath $QtPath
+$QtPath = $qt.Path
+Write-Host "Using Qt $($qt.Version) at $QtPath"
 if (!(Get-Command cmake -ErrorAction SilentlyContinue)) {
     throw "Install CMake 4.2+ and add it to PATH, then open a new PowerShell window."
 }
@@ -50,7 +49,7 @@ Write-Host "Using $generatorName at $($instance.installationPath)"
 # Keep old Visual Studio caches intact and separate from the new generator.
 $build = Join-Path $PSScriptRoot "build\vs$major-x64"
 $dist = Join-Path $PSScriptRoot "dist"
-Invoke-Checked "cmake" @("-S", $PSScriptRoot, "-B", $build, "-G", $generatorName,
+Invoke-Checked "cmake" @("--fresh", "-S", $PSScriptRoot, "-B", $build, "-G", $generatorName,
     "-A", "x64", "-DCMAKE_GENERATOR_INSTANCE=$($instance.installationPath)", "-DCMAKE_PREFIX_PATH=$QtPath")
 Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--parallel")
 Invoke-Checked "cmake" @("--install", $build, "--config", "Release", "--prefix", $dist)
