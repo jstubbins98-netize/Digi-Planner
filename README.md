@@ -18,11 +18,35 @@ Open PowerShell in this folder and run:
 
 Before configuring or compiling, the script automatically searches Qt environment hints (`QTDIR`, `QT_ROOT_DIR`, `Qt6_DIR`, `CMAKE_PREFIX_PATH`), `qmake.exe` locations on PATH, `Qt` folders on local fixed drives, Program Files and user folders, and Qt uninstall-registry installation locations. It checks each root and two directory levels below it rather than scanning entire drives.
 
-It selects the newest detected Qt 6.5+ MSVC x64 shared-library kit with the required CMake modules, DLLs, SQLite driver, Windows platform plugin and deployment tool. The selected version and path are printed. Incompatible or incomplete kits are skipped; if none qualify, the script stops with instructions. For a custom location or to choose a specific kit, supply an explicit path (an invalid explicit path stops the build instead of falling back):
+It selects the newest detected Qt 6.5+ MSVC x64 shared-library kit with the required CMake modules, DLLs, SQLite driver, Windows platform plugin and deployment tool. The selected version and path are printed. Incompatible or incomplete kits are skipped; if none qualify, the script lists searched roots and rejection reasons, including missing files or the wrong architecture. For a custom location or to choose a specific kit, supply an explicit path (an invalid explicit path stops the build instead of falling back):
 
 ```powershell
 .\build.ps1 -QtPath "C:\Qt\6.8.3\msvc2022_64" -Launch
 ```
+
+`-QtPath` also accepts an installation root such as `C:\Qt`, a version folder, or a kit's `bin` / `lib\cmake\Qt6` folder. It searches only within the supplied location, not unrelated installations.
+
+### If Qt cannot be found
+
+The message **“No suitable Qt installation found”** occurs before compilation. It means Qt is missing, installed outside the searched locations, or was rejected as incompatible or incomplete. Older versions of the script did not report the specific reason.
+
+If updating from an earlier source ZIP, replace **both `build.ps1` and `Find-Qt.ps1`** with the versions from the updated package. Keep them together in the `digi-planner` folder.
+
+Run detection without compiling:
+
+```powershell
+.\build.ps1 -DiagnoseQt
+# If you installed Qt at a custom location, replace this path with that actual folder:
+.\build.ps1 -QtPath "C:\Qt" -DiagnoseQt
+```
+
+If no kit is found, install the **Qt libraries**, not just Qt Creator or Visual Studio. Use the [Qt installer](https://www.qt.io/download-qt-installer-oss) or an existing Qt Maintenance Tool to add a Qt 6.5+ **MSVC x64 desktop kit**. Qt Base includes Widgets and SQL; the SQLite and Windows platform plugins must be present. Do not select MinGW or ARM for this project. If a kit is found but rejected, the diagnostic output names the missing file or incompatible architecture. Repair the listed components with Qt Maintenance Tool.
+
+If detection still fails, share the complete diagnostic output, including the searched folders and rejection reasons. Use your actual Qt installation path rather than copying an example path that does not exist on your PC.
+
+Once detection succeeds, compile and launch with `.\build.ps1 -Launch`, or include the same `-QtPath` override if your installation is in a custom location.
+
+The discovery regression checks can be run with `pwsh -NoProfile -File .\tests\QtDiscovery.Tests.ps1`. They use temporary simulated kits, not a real Qt installation. Passing them does not verify native Windows compilation or registry discovery.
 
 If PowerShell blocks the local script, use a one-process policy override, only after reviewing the script:
 
