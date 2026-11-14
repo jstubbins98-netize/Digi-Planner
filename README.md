@@ -58,7 +58,7 @@ References: [CMake's VS 2026 generator](https://cmake.org/cmake/help/latest/gene
 
 The database is **`%LOCALAPPDATA%\DigiPlanner\DigiPlanner\planner.db`**.
 
-Unlike the original cross-platform description, the Windows edition stores data in the Windows user's writable local application-data folder, **not** the executable's working directory. This avoids permission failures under Program Files and preserves assignments when the program is updated. Hover over “Saved automatically on this PC” to see the exact path.
+this Windows edition stores data in the Windows user's writable local application-data folder, **not** the executable's working directory. This avoids permission failures under Program Files and preserves assignments when the program is updated. Hover over “Saved automatically on this PC” to see the exact path.
 
 Close Digi-Planner before copying `planner.db` for a backup. To restore, close the app, keep a copy of the current database, then replace it with your backup. TXT and PDF are reports, not importable backups.
 
