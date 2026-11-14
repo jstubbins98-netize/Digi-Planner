@@ -1,7 +1,6 @@
 # Digi-Planner for Windows 11
 
-A native C++17 / Qt 6 student planner. No browser, Node.js, account, server, or network service is used by this application. Windows 11 x64 is the supported target.
-
+A native C++17 / Qt 6 student planner that targets Windows 11. useful for both students and employees
 ## Build on Windows 11
 
 Install these prerequisites:
