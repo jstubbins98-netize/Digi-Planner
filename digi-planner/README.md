@@ -58,6 +58,31 @@ The script detects the newest installed stable Visual Studio 2026-or-newer insta
 
 The script refreshes CMake's configuration cache so switching Qt kits does not reuse an old Qt path, builds Release and stages the application and Qt runtime in **`dist`**. Run **`dist\DigiPlanner.exe`**. The script does not install dependencies automatically or change your system policy.
 
+### Qt is installed, but only MinGW kits are found
+
+If the diagnostic output lists folders such as `C:\Qt\6.12.0\mingw_64` and reports a missing `lib\Qt6Core.lib`, you have a **MinGW Qt kit**, not the **MSVC Qt kit** required by this project's Visual Studio build. The two kits are not interchangeable. Qt Creator and the MinGW compiler under `C:\Qt\Tools` are not substitutes for the MSVC Qt libraries.
+
+To install the correct kit:
+
+1. Open **Qt Maintenance Tool**, usually at:
+   ```powershell
+   & "C:\Qt\MaintenanceTool.exe"
+   ```
+   If Qt was installed elsewhere, use that installation's Maintenance Tool.
+2. Choose **Add or remove components**.
+3. Expand a Qt version **6.5 or newer**.
+4. Select **MSVC 2022 64-bit**, or a compatible newer **MSVC x64** component if offered. Do not select MinGW or ARM.
+   - The `MSVC 2022` label describes the compiler used to build Qt. Those libraries can be used with Visual Studio 2026 under Microsoft's binary-compatibility rules; the application still builds with Visual Studio 2026 or newer.
+5. Complete the installation. You can keep the existing MinGW kits.
+
+Then run from the `digi-planner` folder:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
+```
+
+The script should automatically detect the newly installed MSVC kit. **Do not rename a MinGW folder or copy a `.lib` file into it** to bypass validation—the correct Qt build must be installed.
+
 ### Manual equivalent
 
 ```powershell
