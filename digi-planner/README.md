@@ -6,9 +6,9 @@ A native C++17 / Qt 6 student planner. No browser, Node.js, account, server, or 
 
 Install these prerequisites:
 
-1. **Visual Studio 2022 Community or Build Tools**, with **Desktop development with C++**, the MSVC v143 x64 tools and a Windows 11 SDK.
-2. **Qt 6.5 or newer**, using a **MSVC 2022 64-bit kit** (for example Qt 6.8.3 `msvc2022_64`). The Qt kit and compiler must match. Include Qt Widgets and Qt SQL / SQLite support. Do not select the MinGW, ARM or WebAssembly kits for this build.
-3. **CMake 3.24 or newer**, added to PATH.
+1. **Visual Studio 2026 (version 18) or newer**, Community, Professional, Enterprise or Build Tools, with **Desktop development with C++**, its current MSVC x64 tools (**v145 or newer**) and a Windows 11 SDK.
+2. **Qt 6.5 or newer**, using a compatible **MSVC x64 shared-library kit** with Qt Widgets and Qt SQL / SQLite support. Existing kits may still be named `msvc2022_64` (for example Qt 6.8.3). That name identifies the compiler used to build Qt, not the Visual Studio version this app uses. Microsoft's binary-compatibility rules allow older MSVC libraries to be linked by newer MSVC tools. This is not a claim that every Qt release officially certifies VS 2026. Prefer a maintained Qt release; use a compatible kit or rebuild Qt with your selected compiler if you encounter compatibility issues. Do not select MinGW, ARM or WebAssembly kits.
+3. **CMake 4.2 or newer**, added to PATH. CMake 4.2 introduced the `Visual Studio 18 2026` generator. For later Visual Studio releases, install a CMake version that supports that release.
 
 Open PowerShell in this folder and run, replacing the Qt path with your installed kit:
 
@@ -22,18 +22,22 @@ If PowerShell blocks the local script, use a one-process policy override, only a
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -QtPath "C:\Qt\6.8.3\msvc2022_64" -Launch
 ```
 
+The script detects the newest installed stable Visual Studio 2026-or-newer instance with C++ tools using Microsoft's `vswhere`, then selects its matching generator from CMake's available generators. It fails with upgrade instructions if CMake does not support that version; it never silently falls back to VS 2022. Builds are stored separately under `build\vs18-x64` (or the selected newer major version), leaving old build folders intact.
+
 The script builds Release and stages the application and Qt runtime in **`dist`**. Run **`dist\DigiPlanner.exe`**. The script does not install dependencies automatically or change your system policy.
 
 ### Manual equivalent
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.8.3\msvc2022_64"
-cmake --build build --config Release --parallel
-cmake --install build --config Release --prefix dist
+cmake -S . -B build\vs18-x64 -G "Visual Studio 18 2026" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.8.3\msvc2022_64"
+cmake --build build\vs18-x64 --config Release --parallel
+cmake --install build\vs18-x64 --config Release --prefix dist
 .\dist\DigiPlanner.exe
 ```
 
-The CMake project rejects non-Windows and non-MSVC builds. At startup the app checks the actual Windows build (22000 or newer) and workstation product type, rejecting older Windows releases and Windows Server.
+For newer Visual Studio releases, use the matching generator listed by `cmake --help`, or simply use the detection script above. The CMake project rejects non-Windows, non-MSVC, pre-2026 Visual Studio generators and toolsets older than v145. At startup the app checks the actual Windows build (22000 or newer) and workstation product type, rejecting older Windows releases and Windows Server.
+
+References: [CMake's VS 2026 generator](https://cmake.org/cmake/help/latest/generator/Visual%20Studio%2018%202026.html), [Microsoft's MSVC binary compatibility rules](https://learn.microsoft.com/en-us/cpp/porting/binary-compat-2015-2017), and [Qt's supported Windows configurations](https://doc.qt.io/qt-6/windows.html).
 
 ## Features
 
@@ -60,7 +64,7 @@ Close Digi-Planner before copying `planner.db` for a backup. To restore, close t
 
 ## Sharing a build
 
-Share the **entire `dist` folder** as a ZIP. Do not share only the EXE: Qt DLLs, `platforms\qwindows.dll` and `sqldrivers\qsqlite.dll` are required. The Qt deploy step collects runtime dependencies. A recipient may also need Microsoft's Visual C++ 2015–2022 x64 Redistributable.
+Share the **entire `dist` folder** as a ZIP. Do not share only the EXE: Qt DLLs, `platforms\qwindows.dll` and `sqldrivers\qsqlite.dll` are required. The Qt deploy step collects runtime dependencies. A recipient may also need the latest Microsoft Visual C++ x64 Redistributable, at least as new as the build tools used for the application and its dependencies.
 
 This is an unsigned portable-folder application, not an installer. Windows SmartScreen may warn about unsigned downloads. Code signing and installer creation are not included. Review Qt's LGPL/GPL or commercial licensing requirements before distributing; retain applicable license notices and satisfy the terms for your chosen Qt distribution.
 

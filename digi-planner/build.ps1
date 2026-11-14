@@ -12,10 +12,10 @@ if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or
 }
 $QtPath = (Resolve-Path $QtPath).Path
 if (!(Test-Path "$QtPath\lib\cmake\Qt6\Qt6Config.cmake")) {
-    throw "QtPath must point to a Qt MSVC 2022 64-bit kit, for example C:\Qt\6.8.3\msvc2022_64."
+    throw "QtPath must point to a compatible Qt MSVC x64 kit containing lib\cmake\Qt6\Qt6Config.cmake."
 }
 if (!(Get-Command cmake -ErrorAction SilentlyContinue)) {
-    throw "Install CMake 3.24+ and add it to PATH, then open a new PowerShell window."
+    throw "Install CMake 4.2+ and add it to PATH, then open a new PowerShell window."
 }
 
 function Invoke-Checked {
@@ -24,10 +24,34 @@ function Invoke-Checked {
     if ($LASTEXITCODE -ne 0) { throw "$Executable failed with exit code $LASTEXITCODE." }
 }
 
-$build = Join-Path $PSScriptRoot "build"
+$capabilitiesJson = & cmake -E capabilities
+if ($LASTEXITCODE -ne 0) { throw "Could not query CMake capabilities." }
+$capabilities = ($capabilitiesJson -join "`n") | ConvertFrom-Json
+if ([version]("$($capabilities.version.major).$($capabilities.version.minor)") -lt [version]"4.2") {
+    throw "Visual Studio 2026 requires CMake 4.2 or newer."
+}
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+if (!(Test-Path $vswhere)) { throw "Install Visual Studio 2026 or newer with Desktop development with C++." }
+$instancesJson = & $vswhere -products '*' -version '[18.0,)' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -format json
+if ($LASTEXITCODE -ne 0) { throw "Visual Studio detection failed." }
+$instances = @(($instancesJson -join "`n") | ConvertFrom-Json |
+    Sort-Object { [version]$_.installationVersion } -Descending)
+if ($instances.Count -eq 0) {
+    throw "No Visual Studio 2026+ installation with MSVC x64 tools was found. Install the C++ workload."
+}
+$instance = $instances[0]
+$major = ([version]$instance.installationVersion).Major
+$generator = @($capabilities.generators | Where-Object { $_.name -match "^Visual Studio $major " })
+if ($generator.Count -eq 0) {
+    throw "This CMake version does not support installed Visual Studio $major. Upgrade CMake."
+}
+$generatorName = $generator[0].name
+Write-Host "Using $generatorName at $($instance.installationPath)"
+# Keep old Visual Studio caches intact and separate from the new generator.
+$build = Join-Path $PSScriptRoot "build\vs$major-x64"
 $dist = Join-Path $PSScriptRoot "dist"
-Invoke-Checked "cmake" @("-S", $PSScriptRoot, "-B", $build, "-G", "Visual Studio 17 2022",
-    "-A", "x64", "-DCMAKE_PREFIX_PATH=$QtPath")
+Invoke-Checked "cmake" @("-S", $PSScriptRoot, "-B", $build, "-G", $generatorName,
+    "-A", "x64", "-DCMAKE_GENERATOR_INSTANCE=$($instance.installationPath)", "-DCMAKE_PREFIX_PATH=$QtPath")
 Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--parallel")
 Invoke-Checked "cmake" @("--install", $build, "--config", "Release", "--prefix", $dist)
 if (!(Test-Path "$dist\sqldrivers\qsqlite.dll")) {
