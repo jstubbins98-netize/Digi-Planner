@@ -1,6 +1,6 @@
 # Digi-Planner for Windows 11
 
-a free and open source digital planner app for windows 11 available for students and businesses.
+a free and open source digital planner app for Windows 11 available for students and businesses.
 
 ## Build on Windows 11
 
