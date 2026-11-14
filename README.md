@@ -89,19 +89,3 @@ src/MainWindow.*        Assignment form, table, filters and class management
 src/CalendarView.*      Calendar cell markers and day-details dialog
 src/Export.*            Atomic TXT/PDF exports
 ```
-
-## Verification status
-
-This source was authored in a Linux environment. The Windows executable has **not** been built or run here. Build and native GUI verification on Windows 11 are still required; this delivery does not include a compiled EXE.
-
-After building on Windows, check:
-
-1. Create an assignment, restart and confirm persistence.
-2. Create a weekly assignment and verify eight dates spaced seven days apart.
-3. Select an event, change class/status/priority, and confirm filters and pending hours update.
-4. Remove a class with assignments; confirm they move to Other and the class stays removed after restart.
-5. Test calendar dots with six events on one date and open its details.
-6. Restart with unfinished assignments due in 0, 1, 2 and 3 days; confirm the startup reminder.
-7. Export while filters are active; confirm all assignments are included. Export enough events to check multi-page PDF output.
-8. Delete an event, including cancellation, and confirm only the chosen occurrence is removed.
-9. Run the packaged `dist` folder on another Windows 11 x64 PC to verify runtime deployment.
