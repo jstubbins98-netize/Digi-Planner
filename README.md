@@ -4,6 +4,13 @@ a free and open source digital planner app for Windows 11 available for students
 
 ## Build on Windows 11
 
+**The final EXE is located in `dist`, NOT `build`:**
+after the build completes successfully, open **`digi-planner\dist\DigiPlanner.exe`**.
+The `build` folder contains intermediate build output, not the packaged application.
+Do not launch or distribute the EXE from `build`; it may be missing the Qt DLLs
+needed to run. Keep the final EXE together with all DLLs and plugin folders in
+`dist`. To launch it from your Desktop, create a shortcut rather than moving the EXE.
+
 Install these prerequisites:
 
 1. **Visual Studio 2026 (version 18) or newer**, Community, Professional, Enterprise or Build Tools, with **Desktop development with C++**, its current MSVC x64 tools (**v145 or newer**) and a Windows 11 SDK.
@@ -140,6 +147,24 @@ Unlike the original cross-platform description, the Windows edition stores data 
 Close Digi-Planner before copying `planner.db` for a backup. To restore, close the app, keep a copy of the current database, then replace it with your backup. TXT and PDF are reports, not importable backups.
 
 ## Sharing a build
+
+### Packaging reports missing qwindows.dll and qsqlite.dll
+
+If compilation finishes but `build.ps1` reports missing `platforms\qwindows.dll`
+and `sqldrivers\qsqlite.dll`, the plugins may have been deployed into
+`dist\plugins` instead of the locations checked by the script. This does not
+necessarily mean your Qt installation is missing those plugins.
+
+The updated `CMakeLists.txt` explicitly deploys plugins beside the EXE and lets
+Qt generate the matching runtime configuration. Replace your local
+`CMakeLists.txt` with the updated version, then double-click `run_build.bat`
+again. No Qt reinstall is needed for a deployment-folder mismatch.
+
+After a successful build, the package should contain
+`dist\platforms\qwindows.dll` and `dist\sqldrivers\qsqlite.dll`.
+Run `dist\DigiPlanner.exe` and keep the entire `dist` folder together.
+If packaging still fails, retain the complete deployment output, including
+the lines before the missing-file message.
 
 ### Qt6Core.dll was not found
 
