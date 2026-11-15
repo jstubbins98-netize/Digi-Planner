@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "CalendarView.h"
 #include "Export.h"
+#include "Tutorial.h"
+#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateEdit>
@@ -15,6 +17,9 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QMenu>
+#include <QMenuBar>
+#include <QKeySequence>
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QStackedWidget>
@@ -63,6 +68,10 @@ MainWindow::MainWindow(Database &database, const QString &databasePath) : db(dat
 
 void MainWindow::buildUi(const QString &databasePath) {
     setWindowTitle("Digi-Planner");
+    auto *helpMenu = menuBar()->addMenu("&Help");
+    auto *tutorialAction = helpMenu->addAction("&Tutorial");
+    tutorialAction->setShortcut(QKeySequence(Qt::Key_F1));
+    connect(tutorialAction, &QAction::triggered, this, [this] { Tutorial::show(this); });
     resize(1180, 800);
     setMinimumSize(980, 680);
     auto *root = new QWidget(this);
@@ -75,6 +84,10 @@ void MainWindow::buildUi(const QString &databasePath) {
     auto *title = new QLabel("Digi-Planner\nYour assignments. A clearer week.", root);
     title->setObjectName("heading");
     heading->addWidget(title, 1);
+    auto *tutorialButton = new QPushButton("Tutorial", root);
+    tutorialButton->setToolTip("Learn how to use Digi-Planner (F1)");
+    heading->addWidget(tutorialButton);
+    connect(tutorialButton, &QPushButton::clicked, this, [this] { Tutorial::show(this); });
     auto *switchView = new QPushButton("Switch to Calendar View", root);
     heading->addWidget(switchView);
     layout->addLayout(heading);

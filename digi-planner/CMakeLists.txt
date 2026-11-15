@@ -34,6 +34,7 @@ qt_add_executable(DigiPlanner WIN32
     src/CalendarView.h src/CalendarView.cpp
     src/MainWindow.h src/MainWindow.cpp
     src/Export.h src/Export.cpp
+    src/Tutorial.h src/Tutorial.cpp
 )
 target_link_libraries(DigiPlanner PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql)
 target_compile_options(DigiPlanner PRIVATE /W4 /utf-8 /permissive-)
