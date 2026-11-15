@@ -141,6 +141,24 @@ Close Digi-Planner before copying `planner.db` for a backup. To restore, close t
 
 ## Sharing a build
 
+### Packaging reports missing qwindows.dll and qsqlite.dll
+
+If compilation finishes but `build.ps1` reports missing `platforms\qwindows.dll`
+and `sqldrivers\qsqlite.dll`, the plugins may have been deployed into
+`dist\plugins` instead of the locations checked by the script. This does not
+necessarily mean your Qt installation is missing those plugins.
+
+The updated `CMakeLists.txt` explicitly deploys plugins beside the EXE and lets
+Qt generate the matching runtime configuration. Replace your local
+`CMakeLists.txt` with the updated version, then double-click `run_build.bat`
+again. No Qt reinstall is needed for a deployment-folder mismatch.
+
+After a successful build, the package should contain
+`dist\platforms\qwindows.dll` and `dist\sqldrivers\qsqlite.dll`.
+Run `dist\DigiPlanner.exe` and keep the entire `dist` folder together.
+If packaging still fails, retain the complete deployment output, including
+the lines before the missing-file message.
+
 ### Qt6Core.dll was not found
 
 This Windows error means the application cannot locate a required Qt runtime library. It is a launch/deployment problem, not necessarily a compilation failure.

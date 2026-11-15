@@ -46,5 +46,8 @@ qt_generate_deploy_app_script(
     TARGET DigiPlanner
     OUTPUT_SCRIPT deploy_script
 )
+# Set the install-time deployment layout explicitly. Qt otherwise defaults to
+# a plugins/ directory, while this portable package expects plugins beside the EXE.
+install(CODE "set(QT_DEPLOY_PLUGINS_DIR \".\")")
 install(SCRIPT ${deploy_script})
 install(FILES README.md DESTINATION .)
