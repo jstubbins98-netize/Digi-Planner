@@ -83,6 +83,26 @@ powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
 
 The script should automatically detect the newly installed MSVC kit. **Do not rename a MinGW folder or copy a `.lib` file into it** to bypass validation—the correct Qt build must be installed.
 
+### The MSVC folder exists, but the core Qt files are missing
+
+An `msvc2022_64` folder does not necessarily mean the full desktop kit is installed. If it contains Qt Insight files such as `qtinsight`, `config_qtinsighttracker.opt` and `config_qtinsighttracker.summary`, while diagnostics report **all core Qt files missing**, the add-on may have been installed without the main MSVC Qt libraries. Qt Insight files alone are not proof of a broken installation; the missing core files are the important evidence.
+
+To add the main libraries:
+
+1. Open **`C:\Qt\MaintenanceTool.exe`**, or the Maintenance Tool in your actual Qt installation folder.
+2. Select **Add or remove components**.
+3. Expand **Qt → Qt 6.12.0**, or your chosen Qt version (6.5 or newer).
+4. Select the main **MSVC 2022 64-bit** component, or a compatible newer MSVC x64 kit—not just Qt Insight or another add-on.
+5. Click **Next**, apply the changes and wait for installation to finish.
+
+You do not need to delete the existing folders. After installation, run from the `digi-planner` folder:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
+```
+
+If you are unsure which component to select, share a screenshot of the Maintenance Tool's component-selection screen with your chosen Qt version expanded.
+
 ### Manual equivalent
 
 ```powershell
