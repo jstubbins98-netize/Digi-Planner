@@ -17,7 +17,29 @@ Install these prerequisites:
 2. **Qt 6.5 or newer**, using a compatible **MSVC x64 shared-library kit** with Qt Widgets and Qt SQL / SQLite support. Existing kits may still be named `msvc2022_64` (for example Qt 6.8.3). That name identifies the compiler used to build Qt, not the Visual Studio version this app uses. Microsoft's binary-compatibility rules allow older MSVC libraries to be linked by newer MSVC tools. This is not a claim that every Qt release officially certifies VS 2026. Prefer a maintained Qt release; use a compatible kit or rebuild Qt with your selected compiler if you encounter compatibility issues. Do not select MinGW, ARM or WebAssembly kits.
 3. **CMake 4.2 or newer**, added to PATH. CMake 4.2 introduced the `Visual Studio 18 2026` generator. For later Visual Studio releases, install a CMake version that supports that release.
 
-Open PowerShell in this folder and run:
+### Build by double-clicking the BAT script
+
+After installing the prerequisites:
+
+1. Open the `digi-planner` folder in File Explorer.
+2. Double-click **`run_build.bat`**. Keep it beside `build.ps1` and `Find-Qt.ps1`.
+3. Wait for **“Build completed successfully.”** The window stays open so you can
+   read the result or any errors before pressing a key to close it.
+4. Open **`dist\DigiPlanner.exe`**, not the EXE in `build`. The BAT script builds
+   and packages the app; it does not launch it automatically.
+
+The BAT script runs the following command from the project folder:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File ".\build.ps1"
+```
+
+The execution-policy bypass applies only to that PowerShell session; it does not
+permanently change your Windows execution-policy settings.
+
+### Build and launch from PowerShell
+
+Alternatively, open PowerShell in this folder and run:
 
 ```powershell
 .\build.ps1 -Launch
