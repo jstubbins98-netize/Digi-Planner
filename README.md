@@ -147,6 +147,7 @@ References: [CMake's VS 2026 generator](https://cmake.org/cmake/help/latest/gene
 
 ## Features
 
+- Optional step-by-step tutorial: click **Tutorial**, choose **Help > Tutorial**, or press **F1** at any time in the main window.
 - Add assignments with a name, due date, class, status, priority, estimated decimal hours and weekly recurrence.
 - Weekly recurrence inserts exactly **8 entries**: the initial date and seven weekly occurrences, in one database transaction.
 - Select a table row to instantly save changes to **Class**, **Status** and **Priority** in the bottom action bar. These are the editable fields requested in the specification; name, date and hours are set when creating an assignment.
@@ -167,6 +168,21 @@ The database is **`%LOCALAPPDATA%\DigiPlanner\DigiPlanner\planner.db`**.
 Unlike the original cross-platform description, the Windows edition stores data in the Windows user's writable local application-data folder, **not** the executable's working directory. This avoids permission failures under Program Files and preserves assignments when the program is updated. Hover over “Saved automatically on this PC” to see the exact path.
 
 Close Digi-Planner before copying `planner.db` for a backup. To restore, close the app, keep a copy of the current database, then replace it with your backup. TXT and PDF are reports, not importable backups.
+
+## Optional tutorial
+
+Click **Tutorial** at the top of the planner, choose **Help > Tutorial**, or press
+**F1** to open the guide from either List View or Calendar View. It never opens
+automatically and does not change your data.
+
+Use **Next** and **Back** to learn about classes, adding assignments, weekly
+recurrence, searching and filtering, updating and deleting entries, the calendar,
+startup reminders, exports and local saving. You can keep the guide open while
+using the planner; actions you perform in the planner still affect your real data.
+
+Choose **Close tutorial**, press **Esc**, or close the window to leave early.
+**Finish** closes the last page. Reopening a closed guide starts it from the
+beginning; selecting Tutorial while it is already open brings that window forward.
 
 ## Sharing a build
 
