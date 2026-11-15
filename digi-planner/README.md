@@ -4,6 +4,13 @@ a free and open source digital planner app for Windows 11 available for students
 
 ## Build on Windows 11
 
+**The final EXE is located in `dist`, NOT `build`:**
+after the build completes successfully, open **`digi-planner\dist\DigiPlanner.exe`**.
+The `build` folder contains intermediate build output, not the packaged application.
+Do not launch or distribute the EXE from `build`; it may be missing the Qt DLLs
+needed to run. Keep the final EXE together with all DLLs and plugin folders in
+`dist`. To launch it from your Desktop, create a shortcut rather than moving the EXE.
+
 Install these prerequisites:
 
 1. **Visual Studio 2026 (version 18) or newer**, Community, Professional, Enterprise or Build Tools, with **Desktop development with C++**, its current MSVC x64 tools (**v145 or newer**) and a Windows 11 SDK.
