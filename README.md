@@ -249,7 +249,6 @@ src/MainWindow.*        Assignment form, table, filters and class management
 src/CalendarView.*      Calendar cell markers and day-details dialog
 src/Export.*            Atomic TXT/PDF exports
 ```
-
 ## License
 
 license is Apache License, Version 2.0
