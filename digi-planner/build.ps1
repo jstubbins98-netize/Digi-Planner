@@ -58,9 +58,19 @@ Invoke-Checked "cmake" @("--fresh", "-S", $PSScriptRoot, "-B", $build, "-G", $ge
     "-A", "x64", "-DCMAKE_GENERATOR_INSTANCE=$($instance.installationPath)", "-DCMAKE_PREFIX_PATH=$QtPath")
 Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--parallel")
 Invoke-Checked "cmake" @("--install", $build, "--config", "Release", "--prefix", $dist)
-if (!(Test-Path "$dist\sqldrivers\qsqlite.dll")) {
-    throw "The SQLite driver was not packaged. Check your Qt installation."
+$requiredRuntime = @(
+    "DigiPlanner.exe",
+    "Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Sql.dll",
+    "platforms\qwindows.dll", "sqldrivers\qsqlite.dll"
+)
+$missingRuntime = @($requiredRuntime | Where-Object {
+    !(Test-Path -LiteralPath (Join-Path $dist $_) -PathType Leaf)
+})
+if ($missingRuntime.Count -gt 0) {
+    throw ("The application package is incomplete. Missing from '$dist': " +
+        ($missingRuntime -join ", ") +
+        ". Do not run or share the EXE alone. See the README section 'Qt6Core.dll was not found'.")
 }
 Write-Host "`nBuild finished. Run: $dist\DigiPlanner.exe"
 Write-Host "When sharing the program, share the entire dist folder, not just the EXE."
-if ($Launch) { Start-Process (Join-Path $dist "DigiPlanner.exe") }
+if ($Launch) { Start-Process (Join-Path $dist "DigiPlanner.exe") -WorkingDirectory $dist }

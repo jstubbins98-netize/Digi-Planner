@@ -141,6 +141,34 @@ Close Digi-Planner before copying `planner.db` for a backup. To restore, close t
 
 ## Sharing a build
 
+### Qt6Core.dll was not found
+
+This Windows error means the application cannot locate a required Qt runtime library. It is a launch/deployment problem, not necessarily a compilation failure.
+
+1. Run **`dist\DigiPlanner.exe`** from the packaged output—not the EXE under `build\...\Release`.
+2. Keep the entire `dist` folder together. Do not move only the EXE to your Desktop or another folder. Create a shortcut to it instead. If you downloaded a ZIP, extract the entire ZIP before launching.
+3. If `dist\Qt6Core.dll` is missing, rerun the build script and let its installation/deployment stage finish:
+
+   ```powershell
+   powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
+   ```
+
+The build script checks for the main Qt DLLs and the Windows/SQLite plugins before reporting success or launching.
+
+For an existing Release EXE already in `dist`, you can also rerun Qt's deployment tool. Use the **same MSVC Qt kit used to compile the EXE**, not a MinGW kit or an unrelated Qt version. For example, if the build used `C:\Qt\6.12.0\msvc2022_64`, run from the project folder:
+
+```powershell
+& "C:\Qt\6.12.0\msvc2022_64\bin\windeployqt.exe" --release --dir ".\dist" ".\dist\DigiPlanner.exe"
+```
+
+Only if that command finishes successfully, launch:
+
+```powershell
+.\dist\DigiPlanner.exe
+```
+
+If deployment reports an error, keep its output for troubleshooting rather than copying random DLLs. Do not download DLLs from third-party DLL sites or put them in Windows system folders. Qt DLLs belong in the application package; platform and SQL plugins belong in their respective subfolders. If `Qt6Core.dll` is present but Windows reports another missing runtime dependency, install the current Microsoft Visual C++ x64 Redistributable compatible with the build tools.
+
 Share the **entire `dist` folder** as a ZIP. Do not share only the EXE: Qt DLLs, `platforms\qwindows.dll` and `sqldrivers\qsqlite.dll` are required. The Qt deploy step collects runtime dependencies. A recipient may also need the latest Microsoft Visual C++ x64 Redistributable, at least as new as the build tools used for the application and its dependencies.
 
 This is an unsigned portable-folder application, not an installer. Windows SmartScreen may warn about unsigned downloads. Code signing and installer creation are not included. Review Qt's LGPL/GPL or commercial licensing requirements before distributing; retain applicable license notices and satisfy the terms for your chosen Qt distribution.
