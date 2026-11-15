@@ -83,6 +83,26 @@ powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
 
 The script should automatically detect the newly installed MSVC kit. **Do not rename a MinGW folder or copy a `.lib` file into it** to bypass validation—the correct Qt build must be installed.
 
+### The MSVC folder exists, but the core Qt files are missing
+
+An `msvc2022_64` folder does not necessarily mean the full desktop kit is installed. If it contains Qt Insight files such as `qtinsight`, `config_qtinsighttracker.opt` and `config_qtinsighttracker.summary`, while diagnostics report **all core Qt files missing**, the add-on may have been installed without the main MSVC Qt libraries. Qt Insight files alone are not proof of a broken installation; the missing core files are the important evidence.
+
+To add the main libraries:
+
+1. Open **`C:\Qt\MaintenanceTool.exe`**, or the Maintenance Tool in your actual Qt installation folder.
+2. Select **Add or remove components**.
+3. Expand **Qt → Qt 6.12.0**, or your chosen Qt version (6.5 or newer).
+4. Select the main **MSVC 2022 64-bit** component, or a compatible newer MSVC x64 kit—not just Qt Insight or another add-on.
+5. Click **Next**, apply the changes and wait for installation to finish.
+
+You do not need to delete the existing folders. After installation, run from the `digi-planner` folder:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
+```
+
+If you are unsure which component to select, share a screenshot of the Maintenance Tool's component-selection screen with your chosen Qt version expanded.
+
 ### Manual equivalent
 
 ```powershell
@@ -120,6 +140,34 @@ Unlike the original cross-platform description, the Windows edition stores data 
 Close Digi-Planner before copying `planner.db` for a backup. To restore, close the app, keep a copy of the current database, then replace it with your backup. TXT and PDF are reports, not importable backups.
 
 ## Sharing a build
+
+### Qt6Core.dll was not found
+
+This Windows error means the application cannot locate a required Qt runtime library. It is a launch/deployment problem, not necessarily a compilation failure.
+
+1. Run **`dist\DigiPlanner.exe`** from the packaged output—not the EXE under `build\...\Release`.
+2. Keep the entire `dist` folder together. Do not move only the EXE to your Desktop or another folder. Create a shortcut to it instead. If you downloaded a ZIP, extract the entire ZIP before launching.
+3. If `dist\Qt6Core.dll` is missing, rerun the build script and let its installation/deployment stage finish:
+
+   ```powershell
+   powershell.exe -ExecutionPolicy Bypass -File .\build.ps1 -Launch
+   ```
+
+The build script checks for the main Qt DLLs and the Windows/SQLite plugins before reporting success or launching.
+
+For an existing Release EXE already in `dist`, you can also rerun Qt's deployment tool. Use the **same MSVC Qt kit used to compile the EXE**, not a MinGW kit or an unrelated Qt version. For example, if the build used `C:\Qt\6.12.0\msvc2022_64`, run from the project folder:
+
+```powershell
+& "C:\Qt\6.12.0\msvc2022_64\bin\windeployqt.exe" --release --dir ".\dist" ".\dist\DigiPlanner.exe"
+```
+
+Only if that command finishes successfully, launch:
+
+```powershell
+.\dist\DigiPlanner.exe
+```
+
+If deployment reports an error, keep its output for troubleshooting rather than copying random DLLs. Do not download DLLs from third-party DLL sites or put them in Windows system folders. Qt DLLs belong in the application package; platform and SQL plugins belong in their respective subfolders. If `Qt6Core.dll` is present but Windows reports another missing runtime dependency, install the current Microsoft Visual C++ x64 Redistributable compatible with the build tools.
 
 Share the **entire `dist` folder** as a ZIP. Do not share only the EXE: Qt DLLs, `platforms\qwindows.dll` and `sqldrivers\qsqlite.dll` are required. The Qt deploy step collects runtime dependencies. A recipient may also need the latest Microsoft Visual C++ x64 Redistributable, at least as new as the build tools used for the application and its dependencies.
 
